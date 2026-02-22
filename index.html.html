@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Message for Sis</title>
+    <style>
+        :root {
+            --haki-red: #ff0000;
+            --ocean-blue: #00a8ff;
+            --deep-sea: #001524;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            font-family: 'Arial Black', sans-serif;
+            background: linear-gradient(135deg, var(--deep-sea) 0%, #0077be 50%, var(--ocean-blue) 100%);
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="18" r="10" fill="%23f4d03f"/><rect x="6" y="16" width="20" height="3" fill="%23e74c3c"/><path d="M6 18 Q 16 28 26 18" fill="%23f4d03f"/></svg>'), auto;
+            transition: background 1.5s ease;
+        }
+
+        /* --- THE HAKI EFFECT --- */
+        .haki-storm {
+            background: radial-gradient(circle, #800000 0%, #000000 100%) !important;
+            animation: supremeShake 0.1s infinite;
+        }
+
+        @keyframes supremeShake {
+            0% { transform: translate(4px, 4px); filter: contrast(1.5); }
+            50% { transform: translate(-6px, -4px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .bubble {
+            position: absolute; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(0, 255, 255, 0.2));
+            box-shadow: inset -5px -5px 20px rgba(255, 255, 255, 0.4);
+            z-index: 1; pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        /* --- UI STYLING --- */
+        .ui-box { text-align: center; z-index: 20; max-width: 900px; padding: 40px; }
+        
+        #message-text {
+            color: white; font-size: 2.2rem; text-transform: uppercase;
+            text-shadow: 3px 3px 0px #000; line-height: 1.6;
+        }
+
+        /* TONED DOWN SOFT GOLD SHIMMER */
+        #final-message { 
+            font-size: 1.8rem; 
+            text-transform: none;
+            line-height: 1.8;
+            background: linear-gradient(to right, #ffffff, #ffe082, #ffffff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmerFlow 5s linear infinite;
+            text-shadow: 0 0 5px rgba(255,255,255,0.2);
+        }
+
+        @keyframes shimmerFlow {
+            to { background-position: 200% center; }
+        }
+
+        .btn-reveal {
+            margin-top: 40px; padding: 20px 50px; font-size: 1.5rem;
+            color: white; border: 5px solid white; background: rgba(255,255,255,0.1);
+            cursor: pointer; border-radius: 15px; backdrop-filter: blur(10px);
+            opacity: 0; transition: 0.5s;
+        }
+
+        #videoModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; display: none; z-index: 500;
+            justify-content: center; align-items: center;
+        }
+        video { width: 85%; border: 3px solid var(--haki-red); }
+
+        #hakiCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+    </style>
+</head>
+<body id="stage">
+
+    <canvas id="hakiCanvas"></canvas>
+    
+    <div class="ui-box" id="main-ui">
+        <div id="message-text"></div>
+        <button class="btn-reveal" id="revealBtn" onclick="openVideo()">
+            🎁 Click to reveal
+        </button>
+    </div>
+
+    <div class="ui-box" id="final-ui" style="display: none; position: fixed;">
+        <div id="final-message"></div>
+    </div>
+
+    <div id="videoModal">
+       <video id="vPlayer" controls playsinline>
+    <source src="your-video.mp4" type="video/mp4">
+</video>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('hakiCanvas');
+        const ctx = canvas.getContext('2d');
+        const msgElement = document.getElementById('message-text');
+        const revealBtn = document.getElementById('revealBtn');
+        const fullText = "YO, Sister!!! You won’t believe this—I’ve got something insanely special to tell you! Hehehe 🥱🥱🥱";
+        let isStorming = false;
+        let hakiActive = true;
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // 1. Initial Typewriter (Matches Opening)
+        let charIndex = 0;
+        function typeWriter() {
+            if (charIndex < fullText.length) {
+                msgElement.innerHTML += fullText.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, 50); 
+            } else { 
+                revealBtn.style.opacity = "1"; 
+                triggerHakiBlast();
+                setInterval(() => { if(hakiActive) triggerHakiBlast(); }, 8000);
+            }
+        }
+        window.onload = typeWriter;
+
+        // 2. Haki Lightning Logic
+        function drawLightning(color) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = Math.random() * 6 + 2;
+            ctx.shadowBlur = 30; ctx.shadowColor = color;
+            ctx.beginPath();
+            let x = Math.random() * canvas.width; let y = 0;
+            ctx.moveTo(x, y);
+            for (let i = 0; i < 12; i++) {
+                x += (Math.random() - 0.5) * 150; y += canvas.height / 12;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        function triggerHakiBlast() {
+            isStorming = true;
+            document.body.classList.add('haki-storm');
+            const activeBubbles = document.querySelectorAll('.bubble');
+            activeBubbles.forEach(b => {
+                b.style.transform = 'scale(2.5)'; b.style.opacity = '0';
+                setTimeout(() => b.remove(), 250);
+            });
+            let flashes = 0;
+            const flashInterval = setInterval(() => {
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                drawLightning(Math.random() > 0.4 ? 'red' : 'black');
+                flashes++;
+                if(flashes > 12) {
+                    clearInterval(flashInterval); ctx.clearRect(0,0,canvas.width, canvas.height);
+                    document.body.classList.remove('haki-storm'); isStorming = false;
+                }
+            }, 50);
+        }
+
+        function openVideo() {
+            document.getElementById('videoModal').style.display = 'flex';
+            document.getElementById('vPlayer').play();
+        }
+
+        // 3. Last Page: Character-by-character (Matches Beginning speed)
+        function closeVideo() {
+            hakiActive = false; 
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('vPlayer').pause();
+            document.getElementById('main-ui').style.display = 'none';
+            
+            document.body.style.background = "radial-gradient(circle, #1a1a1a 0%, #000000 100%)";
+            
+            const finalUI = document.getElementById('final-ui');
+            finalUI.style.display = 'block';
+
+            const fText = "To my crazy little sister: May your days be filled with the kind of laughter that lights up your whole soul and may your journey always be wrapped in warmth, hope, and a joy that never ends. I hope you always    find a million reasons to smile. Keep smiling, keep dreaming, and know that your brother is always proud of you. 🥱 ";
+            let fIndex = 0;
+
+            function typeFinalText() {
+                if (fIndex < fText.length) {
+                    document.getElementById('final-message').innerHTML += fText.charAt(fIndex);
+                    fIndex++;
+                    // MATCHES THE BEGINNING: 50ms per character
+                    setTimeout(typeFinalText, 50); 
+                }
+            }
+            typeFinalText();
+        }
+
+        // Bubble Spawner
+        setInterval(() => {
+            if (isStorming) return;
+            const b = document.createElement('div');
+            const size = Math.random() * 70 + 20;
+            b.className = 'bubble';
+            b.style.width = size + 'px'; b.style.height = size + 'px';
+            b.style.left = Math.random() * 100 + 'vw'; b.style.bottom = '-100px';
+            document.body.appendChild(b);
+            let pos = -100;
+            const float = setInterval(() => {
+                if(isStorming) { clearInterval(float); return; }
+                pos += 2.2; b.style.bottom = pos + 'px';
+                if (pos > window.innerHeight + 100) { clearInterval(float); b.remove(); }
+            }, 16);
+        }, 450);
+
+        document.getElementById('videoModal').onclick = (e) => {
+            if(e.target.id === 'videoModal') closeVideo();
+        };
+    </script>
+</body>
+</html>
